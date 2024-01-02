@@ -3,7 +3,7 @@ from utils import *
 from typing import Callable
 from data_file import iedb, ebola
 class AirrFile():
-    def __init__(self, path: str, use_v: bool = True, use_j: bool = False):
+    def __init__(path: str, use_v: bool = True, use_j: bool = False):
         self.file = pd.read_csv(path, sep = '\t')
         self.use_v = use_v
         self.use_j = use_j
