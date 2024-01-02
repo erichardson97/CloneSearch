@@ -8,6 +8,10 @@ class AirrFile():
         self.use_v = use_v
         self.use_j = use_j
         self.dbs = {}
+        self.__init__ = handle_error(self.__init__)
+        self.process = handle_error(self.process)
+        self.add_db = handle_error(self.add_db)
+        self.query_db = handle_error(self.query_db)
     def process(self):
         self.master = make_hash(self.file, use_v = self.use_v, use_j = self.use_j)
     def add_db(self, path: str, name: str):
@@ -20,10 +24,7 @@ class AirrFile():
             hits = search_two_dbs(self.master, self.dbs[name], threshold = threshold,
                                   score_func = function, use_threshold = use_threshold)
             self.file = annotate_og_file(self.file, hits, column_name = column_name, annot_func=annot_func)
-    self.__init__ = handle_error(self.__init__)
-    self.process = handle_error(self.process)
-    self.add_db = handle_error(self.add_db)
-    self.query_db = handle_error(self.query_db)
+
 class ObjectSet():
     def __init__(self, path: str, db: list, names: list, use_v: bool = True, use_j: bool = False):
         airr_f = AirrFile(path, use_v = use_v, use_j = use_j)
