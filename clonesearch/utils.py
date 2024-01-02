@@ -2,8 +2,11 @@
 from Levenshtein import ratio
 from collections import defaultdict
 from typing import DefaultDict, Callable
+import pandas as pd
+
 def unpack_genes(v_field: str):
     return ','.join(set([p.split('*')[0] for p in v_field.split(',')]))
+
 def make_hash(dataframe: pd.DataFrame, v_field: str = 'v_call', cdr3_field: str = 'cdr3_aa',
               allele: bool = True, sequence_id: str = 'sequence_id', use_v: bool = True,
               use_j: bool = False, j_field: str = 'j_call') -> DefaultDict:
