@@ -3,8 +3,9 @@ from Levenshtein import ratio
 from collections import defaultdict
 from typing import DefaultDict, Callable
 import pandas as pd
+import logging
 
-def unpack_genes(v_field: str):
+def unpack_genes(v_field: str) -> str:
     return ','.join(set([p.split('*')[0] for p in v_field.split(',')]))
 
 def make_hash(dataframe: pd.DataFrame, v_field: str = 'v_call', cdr3_field: str = 'cdr3_aa',
@@ -87,11 +88,13 @@ def annotate_og_file(dataframe: pd.DataFrame, matches: DefaultDict, sequence_id:
     return dataframe
 
 def handle_error(func: Callable) -> Callable:
+    @wraps(func)
     def handle(*args, **kwargs):
         try:
-            func(*args, **kwargs)
-        except:
-            raise Exception
+            return func(*args, **kwargs)
+        except Exception as e:
+            logging.error(f"An error occurred in {func.__name__}: {e}")
+            raise
     return handle
 
 
