@@ -4,6 +4,19 @@ from collections import defaultdict
 from typing import DefaultDict, Callable
 import pandas as pd
 import logging
+import requests
+
+def download_covabdab(outf: str, filter_human: True) -> str:
+    f = requests.get('https://opig.stats.ox.ac.uk/webapps/covabdab/static/downloads/CoV-AbDab_130623.csv')
+    with open(outf, 'w') as k:
+        k.write(f.content.decode())
+    db = pd.read_csv(outf)
+    if filter_human:
+        db = db[(db['Heavy V Gene'].str.contains('Human'))&(db["Origin"].str.contains('Convalescent|Vaccinee|Human'))]
+    db['v_call'] = db['Heavy V Gene'].map(lambda x:x.split('(')[0])
+    db['j_call'] = db['Heavy J Gene'].map(lambda x:x.split('(')[0])
+    hash = make_hash(db, cdr3_field = 'CDRH3', allele = False, sequence_id = 'Name')
+    return hash
 
 def unpack_genes(v_field: str) -> str:
     return ','.join(set([p.split('*')[0] for p in v_field.split(',')]))
@@ -93,9 +106,6 @@ def handle_error(func: Callable) -> Callable:
         try:
             return func(*args, **kwargs)
         except Exception as e:
-            logging.error(f"An error occurred in {func.__name__}: {e}")
+            logging.error(f"Error in: {func.__name__}: {e}")
             raise
     return handle
-
-
-
