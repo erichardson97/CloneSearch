@@ -3,8 +3,22 @@ from Levenshtein import ratio
 from collections import defaultdict
 from typing import DefaultDict, Callable
 import pandas as pd
+import logging
+import requests
 
-def unpack_genes(v_field: str):
+def download_covabdab(outf: str, filter_human: True) -> str:
+    f = requests.get('https://opig.stats.ox.ac.uk/webapps/covabdab/static/downloads/CoV-AbDab_130623.csv')
+    with open(outf, 'w') as k:
+        k.write(f.content.decode())
+    db = pd.read_csv(outf)
+    if filter_human:
+        db = db[(db['Heavy V Gene'].str.contains('Human'))&(db["Origin"].str.contains('Convalescent|Vaccinee|Human'))]
+    db['v_call'] = db['Heavy V Gene'].map(lambda x:x.split('(')[0])
+    db['j_call'] = db['Heavy J Gene'].map(lambda x:x.split('(')[0])
+    hash = make_hash(db, cdr3_field = 'CDRH3', allele = False, sequence_id = 'Name')
+    return hash
+
+def unpack_genes(v_field: str) -> str:
     return ','.join(set([p.split('*')[0] for p in v_field.split(',')]))
 
 def make_hash(dataframe: pd.DataFrame, v_field: str = 'v_call', cdr3_field: str = 'cdr3_aa',
@@ -87,12 +101,11 @@ def annotate_og_file(dataframe: pd.DataFrame, matches: DefaultDict, sequence_id:
     return dataframe
 
 def handle_error(func: Callable) -> Callable:
+    @wraps(func)
     def handle(*args, **kwargs):
         try:
-            func(*args, **kwargs)
-        except:
-            raise Exception
+            return func(*args, **kwargs)
+        except Exception as e:
+            logging.error(f"Error in: {func.__name__}: {e}")
+            raise
     return handle
-
-
-

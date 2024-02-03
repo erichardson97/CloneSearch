@@ -19,7 +19,7 @@ class AirrFile():
     def query_db(self, name: str, column_name: str, threshold: float = 0.7, function: Callable = ratio,
                  use_threshold: bool = True, annot_func: Callable = lambda x:','.join(x)):
         if name not in self.dbs:
-            return f'Error.'
+            return logging.error(f"The database name you provided for query func doesn't exist, run add_db before.")
         else:
             hits = search_two_dbs(self.master, self.dbs[name], threshold = threshold,
                                   score_func = function, use_threshold = use_threshold)
