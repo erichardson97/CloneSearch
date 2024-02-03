@@ -5,6 +5,7 @@ from typing import DefaultDict, Callable
 import pandas as pd
 import logging
 import requests
+from functools import wraps
 
 def download_covabdab(outf: str, filter_human: True) -> str:
     f = requests.get('https://opig.stats.ox.ac.uk/webapps/covabdab/static/downloads/CoV-AbDab_130623.csv')
