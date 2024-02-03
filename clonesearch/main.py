@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from .utils import *
 from typing import Callable
-from data_file import iedb, ebola
+# from data_file import iedb, ebola
 
 class AirrFile():
     def __init__(self, path: str, use_v: bool = True, use_j: bool = False):
