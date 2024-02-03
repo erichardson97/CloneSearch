@@ -13,6 +13,8 @@ class AirrFile():
         self.process = handle_error(self.process)
         self.add_db = handle_error(self.add_db)
         self.query_db = handle_error(self.query_db)
+    def rename(self, rename: dict):
+        self.file.rename(columns = rename, inplace=True)
     def process(self):
         self.master = make_hash(self.file, use_v = self.use_v, use_j = self.use_j)
     def add_db(self, path: str, name: str):
