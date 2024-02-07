@@ -17,9 +17,9 @@ class AirrFile():
     def rename(self, rename: dict):
         self.file.rename(columns = rename, inplace=True)
     def process(self):
-        self.master = make_hash(self.file, use_v = self.use_v, use_j = self.use_j, use_allele = self.use_allele)
+        self.master = make_hash(self.file, use_v = self.use_v, use_j = self.use_j, allele = self.use_allele)
     def add_db(self, path: str, name: str):
-        self.dbs[name] = make_hash(pd.read_csv(path, sep = '\t'), use_v = self.use_v, use_j = self.use_j)
+        self.dbs[name] = make_hash(pd.read_csv(path, sep = '\t'), use_v = self.use_v, use_j = self.use_j, allele = self.use_allele)
     def query_db(self, name: str, column_name: str, threshold: float = 0.7, function: Callable = ratio,
                  use_threshold: bool = True, annot_func: Callable = lambda x:','.join(x)):
         if name not in self.dbs:
