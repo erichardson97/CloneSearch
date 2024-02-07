@@ -14,8 +14,8 @@ def download_covabdab(outf: str, filter_human: True) -> str:
     db = pd.read_csv(outf)
     if filter_human:
         db = db[(db['Heavy V Gene'].str.contains('Human'))&(db["Origin"].str.contains('Convalescent|Vaccinee|Human'))]
-    db['v_call'] = db['Heavy V Gene'].map(lambda x:x.split('(')[0])
-    db['j_call'] = db['Heavy J Gene'].map(lambda x:x.split('(')[0])
+    db['v_call'] = db['Heavy V Gene'].map(lambda x:x.split(' (')[0])
+    db['j_call'] = db['Heavy J Gene'].map(lambda x:x.split(' (')[0])
     db['cdr3_aa'] = db['CDRH3']
     hash = make_hash(db, allele = False, sequence_id = 'Name')
     return hash
