@@ -4,10 +4,11 @@ from typing import Callable
 # from data_file import iedb, ebola
 
 class AirrFile():
-    def __init__(self, path: str, use_v: bool = True, use_j: bool = False):
+    def __init__(self, path: str, use_v: bool = True, use_j: bool = False, use_allele: bool = False):
         self.file = pd.read_csv(path, sep = '\t')
         self.use_v = use_v
         self.use_j = use_j
+        self.use_allele = use_allele
         self.dbs = {}
         self.__init__ = handle_error(self.__init__)
         self.process = handle_error(self.process)
@@ -16,7 +17,7 @@ class AirrFile():
     def rename(self, rename: dict):
         self.file.rename(columns = rename, inplace=True)
     def process(self):
-        self.master = make_hash(self.file, use_v = self.use_v, use_j = self.use_j)
+        self.master = make_hash(self.file, use_v = self.use_v, use_j = self.use_j, use_allele = self.use_allele)
     def add_db(self, path: str, name: str):
         self.dbs[name] = make_hash(pd.read_csv(path, sep = '\t'), use_v = self.use_v, use_j = self.use_j)
     def query_db(self, name: str, column_name: str, threshold: float = 0.7, function: Callable = ratio,
