@@ -17,7 +17,7 @@ def ascs_ogrdb(ogrdb_file_path: (str | type(None)) = None):
         asc_mapping[k['label']] = k['label'] if k['allele_similarity_cluster_designation'] == None else k['allele_similarity_cluster_designation']
     return asc_mapping
 
-def ascs_github(tsv_file_path: (str | type(None)) = f'asc_cluster_cut.tsv'):
+def ascs_github(tsv_file_path: (str | type(None)) = f'asc_cluster_cut.tsv', key = 'ASC_Cluster_0.25'):
     if (tsv_file_path != None) & (os.path.exists(tsv_file_path)):
         asc_file = pd.read_csv(tsv_file_path, sep = '\t')
     else:
@@ -33,6 +33,7 @@ def download_ogrdb():
 
 
 ascs_dict = ascs_github('asc_cluster_cut.tsv')
+ascs_family = ascs_github('asc_cluster_cut.tsv', key='ASC_Cluster_0.25')
 
 def unpack_genes(v_field: str):
     return ','.join(set([p.split('*')[0] for p in v_field.split(',')]))
@@ -58,13 +59,19 @@ def make_hash(dataframe: pd.DataFrame, v_field: str = 'v_call', cdr3_field: str 
         group.append('v')
         if allele:
             dataframe['v'] = dataframe[v_field]
-            if use_asc:
+            if use_asc == 'cluster':
                 dataframe['v'] = dataframe['v'].map(lambda x:','.join([str(ascs_dict[k]) if k in ascs_dict else k for k in x.split(',')]))
+            elif use_asc == 'family':
+                dataframe['v'] = dataframe['v'].map(
+                    lambda x: ','.join([str(ascs_family[k]) if k in ascs_family else k for k in x.split(',')]))
         else:
             dataframe['v'] = dataframe[v_field].map(unpack_genes)
-            if use_asc:
+            if use_asc == 'cluster':
                 dataframe['v'] = dataframe['v'].map(
                     lambda x: ','.join([str(ascs_dict[k+'*01']) if k+'*01' in ascs_dict else k for k in x.split(',')]))
+            elif use_asc == 'family':
+                dataframe['v'] = dataframe['v'].map(
+                    lambda x: ','.join([str(ascs_family[k+'*01']) if k+'*01' in ascs_family else k for k in x.split(',')]))
         array = dataframe[[sequence_id, 'cdr3_length', cdr3_field, 'v']].values
     else:
         array = dataframe[[sequence_id, 'cdr3_length', cdr3_field]].values
