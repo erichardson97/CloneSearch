@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from utils import *
+from .utils import *
 from typing import Callable
 from data_file import iedb, ebola
 class AirrFile():
