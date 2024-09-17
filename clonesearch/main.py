@@ -3,7 +3,7 @@ from utils import *
 from typing import Callable
 from data_file import iedb, ebola
 class AirrFile():
-    def __init__(self, path: str, use_v: bool = True, use_j: bool = False):
+    def __init__(self, path: str, use_v: bool = True, use_j: bool = False, use_allele: bool = True, use_asc: bool = False):
         self.file = pd.read_csv(path, sep = '\t')
         self.use_v = use_v
         self.use_j = use_j
@@ -12,10 +12,14 @@ class AirrFile():
         self.process = handle_error(self.process)
         self.add_db = handle_error(self.add_db)
         self.query_db = handle_error(self.query_db)
+        self.use_asc = use_asc
+        self.use_allele = use_allele
     def process(self):
-        self.master = make_hash(self.file, use_v = self.use_v, use_j = self.use_j)
+        self.master = make_hash(self.file, use_v = self.use_v, use_j = self.use_j, allele=self.use_allele,
+                                use_asc=self.use_asc)
     def add_db(self, path: str, name: str):
-        self.dbs[name] = make_hash(pd.read_csv(path, sep = '\t'), use_v = self.use_v, use_j = self.use_j)
+        self.dbs[name] = make_hash(pd.read_csv(path, sep = '\t'), use_v = self.use_v, use_j = self.use_j,
+                                   allele = self.use_allele, use_asc = self.use_asc)
     def query_db(self, name: str, column_name: str, threshold: float = 0.7, function: Callable = ratio,
                  use_threshold: bool = True, annot_func: Callable = lambda x:','.join(x)):
         if name not in self.dbs:
