@@ -3,13 +3,43 @@ from Levenshtein import ratio
 from collections import defaultdict
 from typing import DefaultDict, Callable
 import pandas as pd
+import os
+import requests
+def ascs_ogrdb(ogrdb_file_path: (str | type(None)) = None):
+    if ogrdb_file_path != None:
+        ogrdb_file = pd.read_json(ogrdb_file_path)
+    else:
+        download = download_ogrdb()
+        ogrdb_file = pd.read_json(download)
+    alleles = ogrdb_file.iloc[0]['GermlineSet']['allele_descriptions']
+    asc_mapping = {}
+    for k in alleles:
+        asc_mapping[k['label']] = k['label'] if k['allele_similarity_cluster_designation'] == None else k['allele_similarity_cluster_designation']
+    return asc_mapping
+
+def ascs_github(tsv_file_path: (str | type(None)) = f'asc_cluster_cut.tsv'):
+    if (tsv_file_path != None) & (os.path.exists(tsv_file_path)):
+        asc_file = pd.read_csv(tsv_file_path, sep = '\t')
+    else:
+        output = requests.get(f'https://raw.githubusercontent.com/yaarilab/asc_archive/main/asc_cluster_cut.tsv').content.decode()
+        with open(f'asc_cluster_cut.tsv', 'w') as k:
+            k.writelines(output)
+        asc_file = pd.read_csv(f'asc_cluster_cut.tsv', sep = '\t')
+    asc_mapping = dict(asc_file[['allele', 'ASC_Cluster_0.05']].values)
+    return asc_mapping
+
+def download_ogrdb():
+    return None
+
+
+ascs_dict = ascs_github('asc_cluster_cut.tsv')
 
 def unpack_genes(v_field: str):
     return ','.join(set([p.split('*')[0] for p in v_field.split(',')]))
 
 def make_hash(dataframe: pd.DataFrame, v_field: str = 'v_call', cdr3_field: str = 'cdr3_aa',
               allele: bool = True, sequence_id: str = 'sequence_id', use_v: bool = True,
-              use_j: bool = False, j_field: str = 'j_call') -> DefaultDict:
+              use_j: bool = False, j_field: str = 'j_call', use_asc: bool = False) -> DefaultDict:
     '''
 
     :param dataframe:
@@ -28,8 +58,13 @@ def make_hash(dataframe: pd.DataFrame, v_field: str = 'v_call', cdr3_field: str 
         group.append('v')
         if allele:
             dataframe['v'] = dataframe[v_field]
+            if use_asc:
+                dataframe['v'] = dataframe['v'].map(lambda x:','.join([str(ascs_dict[k]) if k in ascs_dict else k for k in x.split(',')]))
         else:
             dataframe['v'] = dataframe[v_field].map(unpack_genes)
+            if use_asc:
+                dataframe['v'] = dataframe['v'].map(
+                    lambda x: ','.join([str(ascs_dict[k+'*01']) if k+'*01' in ascs_dict else k for k in x.split(',')]))
         array = dataframe[[sequence_id, 'cdr3_length', cdr3_field, 'v']].values
     else:
         array = dataframe[[sequence_id, 'cdr3_length', cdr3_field]].values
