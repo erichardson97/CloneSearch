@@ -25,7 +25,7 @@ def ascs_github(tsv_file_path: (str | type(None)) = f'asc_cluster_cut.tsv', key 
         with open(f'asc_cluster_cut.tsv', 'w') as k:
             k.writelines(output)
         asc_file = pd.read_csv(f'asc_cluster_cut.tsv', sep = '\t')
-    asc_mapping = dict(asc_file[['allele', 'ASC_Cluster_0.05']].values)
+    asc_mapping = dict(asc_file[['allele', key]].values)
     return asc_mapping
 
 def download_ogrdb():
