@@ -36,7 +36,10 @@ ascs_dict = ascs_github('asc_cluster_cut.tsv')
 ascs_family = ascs_github('asc_cluster_cut.tsv', key='ASC_Family_0.25')
 
 def unpack_genes(v_field: str):
-    return ','.join(set([p.split('*')[0] for p in v_field.split(',')]))
+    return ','.join(set([p.split('*')[0].strip() for p in v_field.split(',')]))
+
+def unpack_alleles(v_field: str):
+    return ','.join(set([p.strip() for p in v_field.split(',')]))
 
 def make_hash(dataframe: pd.DataFrame, v_field: str = 'v_call', cdr3_field: str = 'cdr3_aa',
               allele: bool = True, sequence_id: str = 'sequence_id', use_v: bool = True,
@@ -58,27 +61,27 @@ def make_hash(dataframe: pd.DataFrame, v_field: str = 'v_call', cdr3_field: str 
     if use_v:
         group.append('v')
         if allele:
-            dataframe['v'] = dataframe[v_field]
+            dataframe['v'] = dataframe[v_field].map(unpack_alleles)
             if use_asc == 'cluster':
-                dataframe['v'] = dataframe['v'].map(lambda x:','.join([str(ascs_dict[k]) if k in ascs_dict else k for k in x.split(',')]))
+                dataframe['v'] = dataframe['v'].map(lambda x:','.join([str(ascs_dict[k.strip()]) if k.strip() in ascs_dict else k for k in x.split(',')]))
             elif use_asc == 'family':
                 dataframe['v'] = dataframe['v'].map(
-                    lambda x: ','.join([str(ascs_family[k]) if k in ascs_family else k for k in x.split(',')]))
+                    lambda x: ','.join([str(ascs_family[k.strip()]) if k.strip() in ascs_family else k for k in x.split(',')]))
         else:
             dataframe['v'] = dataframe[v_field].map(unpack_genes)
             if use_asc == 'cluster':
                 dataframe['v'] = dataframe['v'].map(
-                    lambda x: ','.join([str(ascs_dict[k+'*01']) if k+'*01' in ascs_dict else k for k in x.split(',')]))
+                    lambda x: ','.join([str(ascs_dict[k.strip()+'*01']) if k.strip()+'*01' in ascs_dict else k for k in x.split(',')]))
             elif use_asc == 'family':
                 dataframe['v'] = dataframe['v'].map(
-                    lambda x: ','.join([str(ascs_family[k+'*01']) if k+'*01' in ascs_family else k for k in x.split(',')]))
+                    lambda x: ','.join([str(ascs_family[k.strip()+'*01']) if k.strip()+'*01' in ascs_family else k for k in x.split(',')]))
         array = dataframe[[sequence_id, 'cdr3_length', cdr3_field, 'v']].values
     else:
         array = dataframe[[sequence_id, 'cdr3_length', cdr3_field]].values
     if use_j:
         group.append('j')
         if allele:
-            dataframe['j'] = dataframe[j_field]
+            dataframe['j'] = dataframe[j_field].map(unpack_alleles)
         else:
             dataframe['j'] = dataframe[j_field].map(unpack_genes)
         array = dataframe[[sequence_id, 'cdr3_length', cdr3_field, 'v', 'j']].values
