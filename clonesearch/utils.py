@@ -17,7 +17,7 @@ def ascs_ogrdb(ogrdb_file_path: (str | type(None)) = None):
         asc_mapping[k['label']] = k['label'] if k['allele_similarity_cluster_designation'] == None else k['allele_similarity_cluster_designation']
     return asc_mapping
 
-def ascs_github(tsv_file_path: (str | type(None)) = f'asc_cluster_cut.tsv', key = 'ASC_Cluster_0.25'):
+def ascs_github(tsv_file_path: (str | type(None)) = f'asc_cluster_cut.tsv', key = 'ASC_Family_0.25'):
     if (tsv_file_path != None) & (os.path.exists(tsv_file_path)):
         asc_file = pd.read_csv(tsv_file_path, sep = '\t')
     else:
@@ -33,7 +33,7 @@ def download_ogrdb():
 
 
 ascs_dict = ascs_github('asc_cluster_cut.tsv')
-ascs_family = ascs_github('asc_cluster_cut.tsv', key='ASC_Cluster_0.25')
+ascs_family = ascs_github('asc_cluster_cut.tsv', key='ASC_Family_0.25')
 
 def unpack_genes(v_field: str):
     return ','.join(set([p.split('*')[0] for p in v_field.split(',')]))
